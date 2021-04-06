@@ -1,0 +1,31 @@
+# distance2TSS(PTMs,ISs)
+def distance2TSS(bed_annotation,gff_annotation):
+	chrid2records, chrid2Tss = Convert2ChridFormat(gff_annotation)
+	for record in bed_annotation.records:
+		if record.chrid in chrid2Tss:
+			Tsslist = chrid2Tss[record.chrid]
+			min_hit = np.argsort(np.abs(record.center - np.array(Tsslist)))
+			print(record.center)
+			print(Tsslist)
+			print(min_hit)
+			exit()
+  
+这里 chrid2Tss 保存了IS 的信息，字典的形式，键是chrID,值是一个列表，里面保存了 IS start 的信息
+Tsslist = chrid2Tss[record.chrid] 是指 和PTM相同 chrID 的 IS 对应的一个列表
+min_hit = np.argsort(np.abs(record.center - np.array(Tsslist))) 
+应该是指PTM的center - IS 一个列表（start）
+VIP 得到的只是索引 
+
+min_hit_order = min_hit[0] 差值最小的索引值  对应 列表元素
+
+record.nearest_Tss = chrid2Tss[record.chrid][min_hit_order]
+便是真正的列表中的元素 与 PTM中心距离 最短
+record.nearest_Tss 是 指列表中某一个 IS 的 start
+
+record.dis2tss = abs(record.center - record.nearest_Tss)
+PTM的中心 与 挑选出来的 最近的IS 的start  相减 求绝对值 
+得到 PTM中心与 最近的IS start 的 距离 即为  最小距离 或者最近距离
+保存了 PTM的 每一行 也即是 每一个record 的信息中
+
+record.nearest_gene = chrid2records[record.chrid][min_hit_order]  这里面应该是身份信息 索引 
+record.nearest_Tss = chrid2Tss[record.chrid][min_hit_order]   这里面应该是 真正想要的
